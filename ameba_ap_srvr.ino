@@ -22,8 +22,10 @@ void setup() {
     digitalWrite(i, LOW);
   }
 
+  
+
   //Start the RTC assumption: RTC is initialized and is running
-  ds1307_init();
+  //ds1307_init();
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -35,18 +37,12 @@ void setup() {
     Serial.println("Please upgrade the firmware");
   }
 
-  // attempt to start AP:
-  while (status != WL_CONNECTED) {
-    Serial.print("Attempting to start AP with SSID: ");
-    Serial.println(ssid);
-    status = WiFi.apbegin(ssid, pass, channel);
-    delay(10000);
-  }
+  //check pin13 state and select AP or STA mode
+  srvr_or_ap();
 
-  //AP MODE already started:
-  Serial.println("AP mode already started");
-  Serial.println();
-  server.begin();
+  
+
+  
   //printWifiData();
   //printCurrentNet();
 }
@@ -55,7 +51,7 @@ void setup() {
 void loop() {
 
   //Check time and set the zones
-  displayTime();
+  //displayTime();
   WiFiClient client = server.available();
   if (client) {
     Serial.println("new client");
@@ -70,13 +66,18 @@ void loop() {
         // so you can send a reply
         if (c == '\n' && currentLineIsBlank) {
           // send a standard http response header
+          
+          
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
           client.println("Refresh: 5");  // refresh the page automatically every 5 sec
           client.println();
           client.println("<!DOCTYPE HTML>");
+          servePage(client);
+          /*
           client.println("<html>");
+          
           // output the value of each analog input pin
           for (int i = 1; i <= 4; i++){
             client.print("Zone ");
@@ -86,17 +87,7 @@ void loop() {
             else client.print("OFF");
             client.println("<br />");
           }
-          /* Original for-loop here
-          for (int analogChannel = 0; analogChannel < 6; analogChannel++) {
-            int sensorReading = analogRead(analogChannel);
-            client.print("analog input ");
-            client.print(analogChannel);
-            client.print(" is ");
-            client.print(sensorReading);
-            client.println("<br />");
-          }
-          */
-          client.println("</html>");
+          client.println("</html>");*/
           break;
           }
         if (c == '\n') {
