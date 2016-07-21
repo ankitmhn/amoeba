@@ -57,10 +57,13 @@ void loop() {
     Serial.println("new client");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
+    String response = "";
     while (client.connected()) {
+      
       if (client.available()) {
         char c = client.read();
-        Serial.write(c);
+        //Serial.write(c);
+        response = response + c;
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
@@ -71,7 +74,7 @@ void loop() {
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          //client.println("Refresh: 5");  // refresh the page automatically every 5 sec
           client.println();
           client.println("<!DOCTYPE HTML>");
           servePage(client);
@@ -98,7 +101,10 @@ void loop() {
           currentLineIsBlank = false;
         }
       }
+      
     }
+    Serial.println("Request: "+response);
+    getCreds(response);
     // give the web browser time to receive the data
     delay(1);
 

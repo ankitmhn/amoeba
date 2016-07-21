@@ -29,3 +29,29 @@ void servePage(WiFiClient cl){
    cl.println(page);
 }
 
+int find_text(String needle, String haystack) {
+  int foundpos = -1;
+  for (int i = 0; i <= haystack.length() - needle.length(); i++) {
+    if (haystack.substring(i,needle.length()+i) == needle) {
+      foundpos = i;
+    }
+  }
+  return foundpos;
+}
+
+void getCreds(String str){
+  int pos = find_text("ssid=", str);
+  if(pos == -1){
+    Serial.println("SSID not found");
+    return;
+  }
+  else Serial.println("SSID entered: "+str.substring(pos+5, str.indexOf('&')));
+
+  pos = find_text("pass=", str);  
+  if(pos == -1){
+    Serial.println("PASS not found");
+    return;
+  }
+  else Serial.println("PASS entered: "+str.substring(pos+5, (find_text("&btn", str))));
+}
+
