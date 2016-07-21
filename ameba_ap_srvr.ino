@@ -1,12 +1,13 @@
 
-#include <HttpClient.h>
+//#include <HttpClient.h>
 
 #include <WiFi.h>
 
-char ssid[] = "ameba";  //Set the AP's SSID
-char pass[] = "amebaiot";     //Set the AP's password
+char ssid[50] = "ameba";  //Set the AP's SSID
+char pass[50] = "amebaiot";     //Set the AP's password
 char channel[] = "1";         //Set the AP's channel
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
+bool isSTA = false;
 
 WiFiServer server(80);
 
@@ -104,12 +105,21 @@ void loop() {
       
     }
     Serial.println("Request: "+response);
-    getCreds(response);
+
     // give the web browser time to receive the data
     delay(1);
 
     // close the connection:
     client.stop();
     Serial.println("client disonnected");
+
+    //if we get WiFi creds
+    if(getCreds(response)){
+      //save to NVM
+      writeCredNVM();
+
+      //start STA
+      //1st disconnect, 2nd begin
+    }
   }
 }
