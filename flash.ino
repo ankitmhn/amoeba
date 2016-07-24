@@ -14,15 +14,20 @@ void srvr_or_ap(){
     //AP MODE already started:
     Serial.println("AP mode started");
     Serial.println();
-    server.begin();
+    
   }
   else{
     Serial.println("Will start in STA... ");
     if(readCredNVM()){
-      //WiFi.begin(ssid, pass);
+      while (status != WL_CONNECTED){
+        Serial.print("Attempting to connect to ssid: "); Serial.println(ssid);
+        status = WiFi.begin(ssid, pass);
+        delay(5000);
+      }
       isSTA = true;
       Serial.print("Connected to: ");
       Serial.println(ssid);
+      
       return;
     }
     Serial.println("Could not connect... halting");
@@ -32,34 +37,77 @@ void srvr_or_ap(){
 }
 
 bool readCredNVM(){
-  FlashMemory.read();
-  int len = FlashMemory.buf[0];
-  ssid[len] = '\0';
-  for(int i = 0; i < len; i++) ssid[i] = FlashMemory.buf[i+1];
-
-  int pw_len = FlashMemory.buf[len+1];
-  pass[pw_len] = '\0';
-  for(int i = 0; i < pw_len; i++) pass[i] = FlashMemory.buf[i+len+1];
   Serial.println("Reading from NVM: ");
+  FlashMemory.read();
+  byte len = FlashMemory.buf[0];
+  byte plen = FlashMemory.buf[len+1];
+  ssid[len] = '\0';
+  pass[plen] = '\0';
+
+  //read next i char beginning at pos
+  byte pos = 1;
+  byte i = len;
+  while(i > 0) {
+    ssid[pos - 1] = FlashMemory.buf[pos];
+    pos++;
+    i--;
+  }
+
+  pos = len + 2;
+  i = plen;
+  while(i > 0){
+    pass[plen-i] = FlashMemory.buf[pos];
+    i--;
+    pos++;
+  }
+  
   Serial.print("SSID: ");
   Serial.println(ssid);
   Serial.print("pass: ");
   Serial.print(pass);
+  return true;
 }
 
 bool writeCredNVM(){
   FlashMemory.read();
-  FlashMemory.buf[0] = strlen(ssid);
-  
+
   int len = strlen(ssid);
-  for(int i = 0; i < len; i++) FlashMemory.buf[i+1] = ssid[i];
+  FlashMemory.buf[0] = len;
+
+  Serial.print("FlashMemory.buf[0] = ");
+  Serial.println(len);
+  
+  
+  for(int i = 0; i < len; i++) {
+    FlashMemory.buf[i+1] = ssid[i];
+    Serial.print("FlashMemory.buf[");
+    Serial.print(i+1);
+    Serial.print("] = ");
+    Serial.println(ssid[i]);
+    
+  }
 
   int pw_len = strlen(pass);
   FlashMemory.buf[len+1] = pw_len;
+  Serial.print("pw_len = ");
+  Serial.print(pw_len);
+  Serial.print("stored at: ");
+  Serial.println(len + 1);
   
-  for(int i = 0; i < pw_len; i++) FlashMemory.buf[i+len+1] = pass[i];
-  Serial.println("Writing to NVM: ");
+  for(int i = 0; i < pw_len; i++) {
+    FlashMemory.buf[i+len+2] = pass[i];
+    Serial.print("FlashMemory.buf[");
+    Serial.print(i+len+2);
+    Serial.print("] = ");
+    Serial.println(pass[i]);
+  }
+  Serial.println("Writing to NVM");
   FlashMemory.update();
+
+  FlashMemory.read();
+  Serial.print("SSID len: "); Serial.println(FlashMemory.buf[0]);
+  Serial.print("Pass len: "); Serial.println(FlashMemory.buf[(FlashMemory.buf[0] + 1)]);
+  
   return true;
 }
 void servePage(WiFiClient cl){

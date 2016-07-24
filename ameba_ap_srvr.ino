@@ -40,10 +40,8 @@ void setup() {
 
   //check pin13 state and select AP or STA mode
   srvr_or_ap();
-
-  
-
-  
+  server.begin();
+    
   //printWifiData();
   //printCurrentNet();
 }
