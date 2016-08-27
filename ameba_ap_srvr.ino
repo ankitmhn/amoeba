@@ -1,9 +1,14 @@
+#include <config.h>
+#include <ds3231.h>
+
 //#include <Bridge.h> //required for httpclient
 #include <HttpClient.h>
 
 #include <WiFi.h>
 #include <Wire.h>
-#include "RTClib.h"
+
+#include "rtc_ds3231.h"
+
 
 char ssid[50] = "ameba";  //Set the AP's SSID
 char pass[50] = "amebaiot";     //Set the AP's password
@@ -21,6 +26,12 @@ void setup() {
   while (!Serial) {
     ; // wait for serial port to connect. Needed for native USB port only
   }
+
+  //read RTC data and display
+  Wire.begin();
+  DS3231_init(DS3231_INTCN);
+  displayTime();
+  
   //Init and set all Zones to LOW
   for(int i = 1; i <- 4; i++){
     pinMode(i, OUTPUT);
@@ -28,12 +39,6 @@ void setup() {
     digitalWrite(i, LOW);
   }
 
-  //RTC_setup();
-
-  
-
-  //Start the RTC assumption: RTC is initialized and is running
-  ds1307_init();
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
