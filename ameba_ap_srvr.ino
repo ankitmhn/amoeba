@@ -15,6 +15,8 @@ char pass[50] = "amebaiot";     //Set the AP's password
 char channel[] = "1";         //Set the AP's channel
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
 bool isSTA = false;
+byte schedule[4];
+unsigned long toggle_tme_zones[4];
 
 // Name of the server we want to connect to
 
@@ -31,9 +33,12 @@ void setup() {
   Wire.begin();
   DS3231_init(DS3231_INTCN);
   displayTime();
+
+  setSchedule();
+  setZones();
   
   //Init and set all Zones to LOW
-  for(int i = 1; i <- 4; i++){
+  for(int i = 1; i <= 4; i++){
     pinMode(i, OUTPUT);
     delay(100);
     digitalWrite(i, LOW);
@@ -69,6 +74,10 @@ void loop() {
     //restart the loop
     return;
   }
+
+  //check if any of the zones need with \\
+  toggleZones();
+  
   WiFiClient client = server.available();
   if (client) {
     Serial.println("new client");

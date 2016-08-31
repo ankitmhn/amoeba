@@ -10,6 +10,54 @@ const char kHostname[] = "www.ncdc.noaa.gov";
 
 const char kPath[] = "/cdo-web/api/v2/data?datasetid=GHCND&locationid=ZIP:28801&startdate=2016-08-04&enddate=2016-08-05";
 
+const byte profile[10][4] =
+{
+  {5, 10 , 15, 20},
+  {1, 2 , 3 ,4},
+  {2, 3, 4, 5},
+  {1, 3, 6, 9},
+  {2, 4, 6, 8},
+  {5, 15, 20, 25},
+  {10, 15, 20, 30},
+  {7, 15, 22, 28},
+  {8, 12, 16, 20},
+  {4, 8, 12, 16}
+  
+};
+
+void setSchedule(){
+  //TODO: Create function to select appropriate profile based on time
+  
+  for(byte i = 0 ; i < 4; i++ ) schedule[i] = profile[1][i];
+
+  Serial.println("Schedule is set.");
+}
+
+void setZones(){
+  //TODO: Init zones at powerup
+  for(byte i = 0; i < 4; i++) {    
+    toggle_tme_zones[i]  = millis();
+  }
+}
+
+void toggleZones(){
+
+  //check time elapsed since last toggle and compare with schedule
+  for(byte i = 0; i < 4; i++){
+
+    //convert min to millisec
+    unsigned long period = schedule[i] * 60 * 1000; 
+    unsigned long now = millis();
+
+    for(byte i = 0; i < 4; i++){
+      
+      if( (now - toggle_tme_zones[i])  > schedule[i] )
+        digitalWrite(i+1, !digitalRead(i+1));
+    }
+
+    
+  }
+}
 void GetNOAA(){
   int err =0;
   
